@@ -3,7 +3,7 @@ name: Build source code and Run Valgrind on gst-launch pipeline
 on:
   push:
     branches:
-      - feature/audio_sink_support
+      - master
 
 jobs:
   build:
