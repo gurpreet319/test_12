@@ -1,0 +1,64 @@
+name: Build source code and Run Valgrind on gst-launch pipeline
+#whenenver we push code in feature/audio_sink_support branch, this script will get execute.
+on:
+  push:
+    branches:
+      - feature/audio_sink_support
+
+jobs:
+  build:
+    #our code will compile on the latest version of ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+        #checkout the code from repo to runner machine
+      - name: Checkout code
+        uses: actions/checkout@v2
+        # to install all the dependencies on our runner machine. This will install gstreamer, SDL, ffmpeg, alsa dependencies
+      - name: Install gstreamer, SDL, ffmpeg, alsa dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgstreamer1.0-dev \
+            libgstreamer-plugins-base1.0-dev \
+            libgstreamer-plugins-bad1.0-dev \
+            gstreamer1.0-plugins-base \
+            gstreamer1.0-plugins-good \
+            gstreamer1.0-plugins-bad \
+            gstreamer1.0-plugins-ugly \
+            gstreamer1.0-libav \
+            gstreamer1.0-tools \
+            gstreamer1.0-x \
+            gstreamer1.0-alsa \
+            gstreamer1.0-gl \
+            gstreamer1.0-gtk3 \
+            gstreamer1.0-qt5 \
+            gstreamer1.0-pulseaudio \
+            libsdl2-dev \
+            ffmpeg \
+            alsa-base \
+            alsa-utils
+
+        #  Build code
+      - name: Build code
+        run: make
+
+        # export the libraries and path variables.
+        # TODO: dont have to extact path for gstreamer libraries, have to check it with some dry runs.
+      - name: Export the libraries
+        run: |
+            export LD_LIBRARY_PATH=$PWD/build
+            sudo cp -rf build/lib* /usr/lib/x86_64-linux-gnu/gstreamer-1.0 
+            gst-inspect-1.0 rdkmediaplugins
+        # Install Valgrind and debug libraries   
+      - name: Install Valgrind and debug libraries
+        run: |
+         sudo apt-get install valgrind 
+         sudo apt install ubuntu-dbgsym-keyring 
+      - name: Step up the env setup for valgrind
+        run: | 
+            G_SLICE=always-malloc G_DEBUG=gc-friendly valgrind \
+            --leak-check=full --leak-resolution=high --num-callers=20 --trace-children=yes \
+            --suppressions=.github/workflow/resources/gst.supp \
+            --suppressions=.github/workflow/resources//glib.supp \
+            gst-launch-1.0 playbin uri=file:///.github/workflow/resources/mp4.aac audio-sink=rdkaudsink
