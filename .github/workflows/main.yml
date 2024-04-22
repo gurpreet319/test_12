@@ -51,4 +51,4 @@ jobs:
             --leak-check=full --leak-resolution=high --num-callers=20 --trace-children=yes \
             --suppressions=.github/resources/gst.supp \
             --suppressions=.github/resources/glib.supp \
-            gst-launch-1.0 playbin uri=file:///.github/resources/mp4.aac audio-sink=pulsesink
+            gst-launch-1.0 playbin uri=file:///.github/resources/mp4.aac
