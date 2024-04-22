@@ -49,6 +49,6 @@ jobs:
         run: | 
             G_SLICE=always-malloc G_DEBUG=gc-friendly valgrind \
             --leak-check=full --leak-resolution=high --num-callers=20 --trace-children=yes \
-            --suppressions=.github/workflows/resources/gst.supp \
-            --suppressions=.github/workflows/resources/glib.supp \
-            gst-launch-1.0 playbin uri=file:///.github/workflow/resources/mp4.aac audio-sink=pulsesink
+            --suppressions=.github/resources/gst.supp \
+            --suppressions=.github/resources/glib.supp \
+            gst-launch-1.0 playbin uri=file:///.github/resources/mp4.aac audio-sink=pulsesink
